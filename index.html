@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        font-family: 'Josefin Sans', sans-serif;
+        
+      }
+      .hide {
+        display: none;
+      }
+      .carGame{
+        width: 100%;
+        height: 100vh;
+        background-image: url("https://thumbs.dreamstime.com/b/top-view-city-desert-top-view-city-desert-sand-dune-stones-trees-126173227.jpg");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+      }
+      .car,.enemy{
+        width: 50px;
+        height: 80px;
+        background-color: red;
+        position: absolute; 
+        background-image: url("image/car.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        bottom: 120px;
+      }
+      .gameArea{
+        width: 400px;
+        height: 100vh;
+        background-color: #2d3436;
+        margin: auto;
+        position: relative;
+        overflow: hidden;
+        border-right: 7px dashed #c8d6e5;
+        border-left: 7px dashed #c8d6e5;
+      }
+      .lines{
+        width: 10px;
+        height: 100px;
+        background-color: white;
+        position: absolute;
+        margin-left: 195px;
+
+      }
+      .score{
+        position: absolute;
+        top: 15px;
+        left: 40px;
+        background-color: #10ac85;
+        width: 300px;
+        /* height: 70px; */
+        line-height: 70px;
+        text-align: center;
+        color: white;
+        font-size: 1.5em;
+        /* padding: 10px; */
+       
+        box-shadow: 0 5px 5px #777;
+        
+      }
+      .startScreen{
+        position: absolute;
+        background-color: #ee5253;
+        left: 50%;
+        top: 50%;
+        transform:translate(-50%,-50%);
+        color:white ;
+        z-index: 1;
+        text-align:center ;
+        border:1px solid #ff6b6b ;
+        padding: 15px;
+        margin: auto;
+        width: 50%;
+        cursor: pointer;
+        letter-spacing: 5;
+        font-size: 20px;
+        word-spacing: 3;
+        line-height: 30px;
+        text-transform: uppercase;
+        box-shadow: 0 5px 5px #777;
+      }
+    
+    </style>
+  </head>
+  <body>
+    <div class="carGame">
+      <div class="score"></div>
+      <div class="startScreen">
+        <p>
+          Press here to start <br />
+          Arrow keys to move <br />
+          if you hit another car you will lose.
+        </p>
+      </div>
+      <div class="gameArea">Created by krishan</div>
+    </div>
+
+    <script>
+      const score = document.querySelector(".score");            //reference of score//
+      const startScreen = document.querySelector(".startScreen");//reference of startscreen//
+      const gameArea = document.querySelector(".gameArea");       //reference of gamearea//
+
+      startScreen.addEventListener("click", start); //calling to start fun. start game and unhidegamearea//
+
+      let player = { speed: 5,score: 0};    //make object for car to move on speed 5,and store true for gameplay,and store car distance//
+      let keys = {      
+        ArrowUp: false,            //for keys , when press it convert true and keyup its again false//
+        ArrowDown: false,          //for keys , when press it convert true and keyup its again false//
+        ArrowLeft: false,           //for keys , when press it convert true and keyup its again false//
+        ArrowRight: false,          //for keys , when press it convert true and keyup its again false//
+      };
+
+      //////////////////////////////////////////////////function of keys to convert true and false//////////////////////////////////////////////////////
+      document.addEventListener("keydown", keyDown); //calling to keydown, and do event//
+      document.addEventListener("keyup", keyUp);     //calling to keyup, and do event//
+
+      function keyDown(e) {     //for press key to down press function work//
+        e.preventDefault();      //for own type//
+        keys[e.key] = true;      //convert keydown is true//
+        // console.log(e.key);
+        ////console.log(keys);
+      }
+      function keyUp(e) {      //for press key to up press function work//
+        e.preventDefault();     //for own type//
+        keys[e.key] = false;     //convert keyup is true//                              
+        //// console.log(keys);
+      }
+
+
+       ////////////////////////////////////////////////////////////////for looping in road and cars///////////////////////////////////////////////////////
+      function isCollide(a,b){               //ceck cars are touch or not//
+         aRect =a.getBoundingClientRect();//postion of car.....*//
+         bRect =b.getBoundingClientRect();//postion of enemy car.....*//
+        return !((aRect.top>bRect.bottom) ||(aRect.right<bRect.left)||(aRect.left>bRect.right)||(aRect.bottom<bRect.top))//check they are touch or not//
+
+
+      }
+
+      function endGame(){
+        player.start = false;    
+        startScreen.classList.remove("hide");
+        player.speed=5;
+       startScreen.innerHTML="Game Over <br> your final score is " + player.score +" <br> Press here to restart the ";
+     
+      }
+
+       function moveEnemy(car){
+       let enemy=document.querySelectorAll('.enemy');//reference of enemycars//
+       enemy.forEach(function(item){
+         if(isCollide(car,item)){                    //for colling collide fun., and get true or false for cars are touch or not one another//
+          ////  console.log("Boom hit");
+          endGame();
+         
+
+         }                          
+         if(item.y>=750){                            //when hi cover 750 range so true//
+           item.y=-300;                               //next line after 300px //
+           item.style.left=Math.floor(Math.random()*350)+"px"; //position of cars randon to left//
+         }
+        item.y +=player.speed     //item.y is called player.y which is x*150 and now we add in this 5px more//
+        item.style.top=item.y + "px";   //for distance to one another//
+       })
+     }
+
+
+
+     function moveLines(){
+       let lines=document.querySelectorAll('.lines');//reference of lines//
+       lines.forEach(function(item){                 //for each item in line create looping//
+         if(item.y>=700){                            //positin of lines//
+           item.y-=750;                              //cut in 700 to 0//
+         }
+        item.y +=player.speed     //item.y is called player.y which is x*150 and now we add in this 5px more//
+        item.style.top=item.y + "px"; //for line in middle//
+       })
+     }
+     /////////////////////////////////////////////////////////////after colling gameplay fun.///////////////////////////////////////////////////////////////
+
+    
+      function gamePlay() {                        //for looping//
+        //// console.log("hey i am clicked");
+        let car = document.querySelector('.car');  //reference of car to change his position//
+        let road = gameArea.getBoundingClientRect();//get position of road//
+        ////console.log(road);
+       
+        if (player.start) {                         //for true when gamearea is not hide// 
+        player.speed=player.speed+0.001;            //speed increasing//
+           moveLines();                             //for calling function moveline//
+           moveEnemy(car);                             //for calling function moveenemy//
+          if(keys.ArrowUp && player.y>(road.top+70)){ //first we check key is press or not , second we check car in range of road//
+            player.y-=player.speed //player.speed nothing it is only 5, and player.y is contain position of car//
+          }
+          if(keys.ArrowDown && player.y<(road.bottom-85)){ //first we check key is press or not , second we check car in range of road//
+            player.y+=player.speed  //player.speed nothing it is only 5, and player.y is contain position of car//   
+          }
+          if(keys.ArrowLeft && player.x>0){  //first we check key is press or not , second we check car in range of road//
+            player.x-=player.speed  //player.speed nothing it is only 5, and player.y is contain position of car//
+          }
+          if(keys.ArrowRight&& player.x<(road.width-60)){  //first we check key is press or not , second we check car in range of road//
+            player.x+=player.speed   //speed 5px increase per click,player.speed nothing it is only 5, and player.y is contain position of car//
+          }
+          car.style.top=player.y+"px"; //adding in style car movement to top and //
+          car.style.left=player.x+"px"; //adding in style car movement//
+
+          window.requestAnimationFrame(gamePlay);//for call back//
+          //// console.log(player.score++);
+
+          player.score++;
+          let ps =player.score - 1;
+          score.innerText = "score: "+ps;
+        }
+      }
+
+    /////////////////////////////////////////after colling startscreen ,startscree is hide and game is on//////////////////////////////////////////////
+
+      
+      function start() {                  //function for start game and startscreen//
+
+        // gameArea.classList.remove("hide");//remove hide class style//
+        startScreen.classList.add("hide");//add hide class style//
+        gameArea.innerHTML="";
+
+        player.start = true;                       ////
+        player.score=0;
+        window.requestAnimationFrame(gamePlay);    //call the function for looping gameplay//
+        
+
+
+
+        for(x=0;x<5;x++){                          //for loop for lines,creat line//
+        let roadLine=document.createElement('div');//adding new lines div in gamearea for rod//
+        roadLine.setAttribute('class','lines') 
+        roadLine.y=(x*150);                        //space from top to lines//
+        roadLine.style.top=roadLine.y + "px";
+        gameArea.appendChild(roadLine);                                                
+        }
+        
+
+
+        let car =document.createElement('div');  //make div through js for car//
+        car.setAttribute('class', 'car');        //creat class in div//
+        // car.innerText="hey i your dad";
+        gameArea.appendChild(car);   //puting div in gamearea //
+
+        player.x = car.offsetLeft;   //make varible inside the palyer object, and store distance to left of car//
+        player.y = car.offsetTop;    //make varible inside the palyer object ,and store distance to top of car//
+
+
+
+        for(x=0;x<3;x++){                            //for loop for cars//
+        let enemyCar=document.createElement('div');  //adding new cars div in gamearea for rod//
+        enemyCar.setAttribute('class','enemy') 
+        enemyCar.y=((x+1)*350)*-1;                   //space from top to car//                   
+        enemyCar.style.top=enemyCar.y + "px";
+        enemyCar.style.backgroundColor=randomColor();
+        enemyCar.style.left=Math.floor(Math.random()*350)+"px";//random car position to left//
+        gameArea.appendChild(enemyCar); 
+
+        }
+      }
+
+      function randomColor(){
+        function c(){
+          let hex=Math.floor(Math.random()*256).toString(16);
+          return ("0" + String(hex)).substr(-2);
+
+        }
+        return "#"+c()+c()+c();
+      }
+      
+    </script>
+  </body>
+</html>
